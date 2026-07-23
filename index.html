@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>EZ3 Football Academy Equipment Tracker</title>
+  
+  <!-- Modern Typography (Plus Jakarta Sans & Outfit) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-layout">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="desktop-sidebar">
+      <div class="brand-container">
+        <div class="brand-logo-icon">⚽</div>
+        <div class="brand-text">
+          <span class="brand-title">EZ3 ACADEMY</span>
+          <span class="brand-subtitle">Equipment Tracker</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="inventory" onclick="switchTab('inventory')">
+          <i data-lucide="package"></i>
+          <span>Total Inventory</span>
+        </button>
+
+        <button class="nav-item" data-tab="session" onclick="switchTab('session')">
+          <i data-lucide="activity"></i>
+          <span>Session Log</span>
+          <span class="active-badge-dot" id="active-session-dot" style="display:none;"></span>
+        </button>
+
+        <button class="nav-item" data-tab="history" onclick="switchTab('history')">
+          <i data-lucide="calendar"></i>
+          <span>Daily History</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar-card">
+          <div class="avatar-circle">
+            <i data-lucide="user-check"></i>
+          </div>
+          <div class="user-info">
+            <span class="user-name">EZ3 Ground Staff</span>
+            <span class="user-role">Pitch Operations</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="main-wrapper">
+
+      <!-- MOBILE TOP HEADER BAR -->
+      <header class="mobile-header">
+        <div class="brand-container">
+          <span class="brand-logo-icon">⚽</span>
+          <span class="brand-title">EZ3 ACADEMY</span>
+        </div>
+        <button class="add-item-btn-pill" onclick="openAddItemModal()">
+          <i data-lucide="plus"></i>
+          <span>Add Item</span>
+        </button>
+      </header>
+
+      <!-- TAB 1: TOTAL INVENTORY -->
+      <section id="tab-inventory" class="tab-content active">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Managing EZ3 Academy Equipment & Stock</h1>
+            <p class="page-subtitle">Real-time pitch gear counts, adjustments & loss analytics</p>
+          </div>
+          <button class="desktop-add-btn" onclick="openAddItemModal()">
+            <i data-lucide="plus"></i>
+            <span>Add New Item</span>
+          </button>
+        </div>
+
+        <!-- CATEGORY FILTERS -->
+        <div class="category-filters-container">
+          <button class="cat-pill active" data-cat="All" onclick="filterCategory('All')">
+            <span>All Equipment</span>
+            <span class="count-badge" id="cat-count-all">0</span>
+          </button>
+          <button class="cat-pill" data-cat="Balls" onclick="filterCategory('Balls')">
+            <span>⚽ Balls</span>
+            <span class="count-badge" id="cat-count-balls">0</span>
+          </button>
+          <button class="cat-pill" data-cat="Markers & Cones" onclick="filterCategory('Markers & Cones')">
+            <span>📐 Markers & Cones</span>
+            <span class="count-badge" id="cat-count-markers">0</span>
+          </button>
+          <button class="cat-pill" data-cat="Gym & Agility" onclick="filterCategory('Gym & Agility')">
+            <span>🏋️ Gym & Agility</span>
+            <span class="count-badge" id="cat-count-gym">0</span>
+          </button>
+        </div>
+
+        <!-- BENTO GRID FOR INVENTORY & ANALYTICS -->
+        <div class="bento-grid-inventory">
+          
+          <!-- ANALYTICS WIDGET CARD -->
+          <div class="bento-card analytics-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="badge-tag lime">30-DAY ANALYTICS</span>
+                <h3 class="card-title">Equipment Loss Analytics</h3>
+              </div>
+              <div class="icon-circle lime-bg">
+                <i data-lucide="trending-down"></i>
+              </div>
+            </div>
+
+            <div class="analytics-metrics-row">
+              <div class="metric-box">
+                <span class="metric-val" id="metric-total-lost">0</span>
+                <span class="metric-lbl">Items Misplaced (30d)</span>
+              </div>
+              <div class="metric-box">
+                <span class="metric-val text-lime" id="metric-most-lost">-</span>
+                <span class="metric-lbl">Most Misplaced Gear</span>
+              </div>
+              <div class="metric-box">
+                <span class="metric-val" id="metric-loss-rate">0%</span>
+                <span class="metric-lbl">Loss Recovery Rate</span>
+              </div>
+            </div>
+
+            <div class="loss-chart-container">
+              <div class="chart-header">
+                <span>Loss Frequency by Category</span>
+                <span class="chart-sub">Updated Today</span>
+              </div>
+              <div class="chart-bars-wrapper" id="loss-chart-bars">
+                <!-- Dynamic chart bars -->
+              </div>
+            </div>
+          </div>
+
+          <!-- EQUIPMENT CARDS GRID -->
+          <div class="inventory-items-grid" id="inventory-grid">
+            <!-- Dynamic inventory cards rendered here -->
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: DAILY SESSION LOG -->
+      <section id="tab-session" class="tab-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Pitch Session Equipment Logger</h1>
+            <p class="page-subtitle">Morning & Evening checkout, return verification, and automatic discrepancy detection</p>
+          </div>
+        </div>
+
+        <div class="bento-grid-session">
+          
+          <!-- SESSION CONFIG CARD -->
+          <div class="bento-card session-config-card">
+            
+            <!-- STEP 1: SLOT SELECTION -->
+            <div class="step-group">
+              <label class="step-label">
+                <span class="step-num">1</span>
+                <span>Select Pitch Session Slot</span>
+              </label>
+              <div class="slot-toggle-row">
+                <button class="slot-btn active" id="slot-morning" onclick="selectSessionSlot('Morning')">
+                  <span class="slot-icon">🌅</span>
+                  <div class="slot-text">
+                    <span class="slot-title">Morning Session</span>
+                    <span class="slot-time">06:00 AM - 10:00 AM</span>
+                  </div>
+                </button>
+
+                <button class="slot-btn" id="slot-evening" onclick="selectSessionSlot('Evening')">
+                  <span class="slot-icon">🌆</span>
+                  <div class="slot-text">
+                    <span class="slot-title">Evening Session</span>
+                    <span class="slot-time">04:00 PM - 08:00 PM</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 2: LOGGER IDENTITY -->
+            <div class="step-group">
+              <div class="step-header-flex">
+                <label class="step-label">
+                  <span class="step-num">2</span>
+                  <span>Select Responsible Staff / Coach</span>
+                </label>
+                <button type="button" class="edit-staff-pill-btn" onclick="openManageStaffModal()">
+                  <i data-lucide="edit-3"></i>
+                  <span>Edit Coaches</span>
+                </button>
+              </div>
+              <div class="staff-avatars-grid" id="staff-avatars-list">
+                <!-- Dynamic staff list -->
+              </div>
+            </div>
+
+            <!-- SESSION STATUS INDICATOR CARD -->
+            <div class="session-active-banner" id="session-status-banner">
+              <div class="banner-status-icon" id="banner-status-icon">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="banner-info">
+                <h4 id="banner-status-title">New Session Ready</h4>
+                <p id="banner-status-desc">Select items to checkout for the pitch session.</p>
+              </div>
+              <button class="banner-action-btn" id="banner-switch-btn" style="display:none;" onclick="toggleSessionMode()">
+                Switch to Return Mode
+              </button>
+            </div>
+
+          </div>
+
+          <!-- EQUIPMENT CHECKOUT / RETURN LOGGING CARD -->
+          <div class="bento-card session-items-card">
+            <div class="items-card-header">
+              <div class="header-left">
+                <h3 class="card-title" id="session-items-title">Equipment Checkout Checklist</h3>
+                <p class="card-desc" id="session-items-subtitle">Specify gear count being taken out to the pitch</p>
+              </div>
+              <div class="session-mode-badge" id="session-mode-badge">
+                CHECKOUT MODE
+              </div>
+            </div>
+
+            <!-- CHECKOUT/RETURN EQUIPMENT LIST -->
+            <div class="session-items-list" id="session-items-list">
+              <!-- Dynamic session item list -->
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- STICKY ACTION BUTTON FOR MOBILE & DESKTOP -->
+        <div class="sticky-action-bar" id="sticky-action-bar">
+          <div class="sticky-info">
+            <span class="sticky-count-text" id="sticky-count-text">0 items selected</span>
+            <span class="sticky-subtext" id="sticky-subtext">Ready for pitch checkout</span>
+          </div>
+          <button class="primary-action-btn" id="session-submit-btn" onclick="handleSessionSubmit()">
+            <i data-lucide="check-circle-2"></i>
+            <span id="submit-btn-label">CHECK OUT GEAR</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 3: DAILY HISTORY & MISSING SUMMARIES -->
+      <section id="tab-history" class="tab-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-title">Daily Pitch Ledger & Incident History</h1>
+            <p class="page-subtitle">Historical records, automatic discrepancy alerts, and direct WhatsApp sharing</p>
+          </div>
+          
+          <!-- DATE PICKER HEADER & QUICK FILTER CHIPS -->
+          <div class="history-controls-row">
+            <div class="date-quick-chips">
+              <button type="button" class="date-chip active" id="chip-today" onclick="selectQuickDate('today')">Today</button>
+              <button type="button" class="date-chip" id="chip-yesterday" onclick="selectQuickDate('yesterday')">Yesterday</button>
+              <button type="button" class="date-chip" id="chip-7days" onclick="selectQuickDate('7days')">7 Days Ago</button>
+              <button type="button" class="date-chip" id="chip-all" onclick="selectQuickDate('all')">📅 All Past Logs</button>
+            </div>
+
+            <div class="date-picker-box">
+              <i data-lucide="calendar"></i>
+              <input type="date" id="history-date-picker" onchange="loadHistoryForDate(this.value)">
+            </div>
+          </div>
+        </div>
+
+        <!-- AUTOMATIC DAILY MISSING GEAR SUMMARY CARD -->
+        <div class="bento-card missing-summary-card" id="missing-summary-card">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- SESSION LEDGER CARDS CONTAINER -->
+        <div class="history-sessions-container" id="history-sessions-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FIXED MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="mobile-bottom-nav">
+      <button class="mobile-nav-item active" data-tab="inventory" onclick="switchTab('inventory')">
+        <i data-lucide="package"></i>
+        <span>Stock</span>
+      </button>
+
+      <button class="mobile-nav-item" data-tab="session" onclick="switchTab('session')">
+        <i data-lucide="activity"></i>
+        <span>Session</span>
+        <span class="mobile-active-dot" id="mobile-session-dot" style="display:none;"></span>
+      </button>
+
+      <button class="mobile-nav-item" data-tab="history" onclick="switchTab('history')">
+        <i data-lucide="calendar"></i>
+        <span>History</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- MODAL: ADD NEW ITEM -->
+  <div class="modal-backdrop" id="add-item-modal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="icon-circle lime-bg">
+            <i data-lucide="plus"></i>
+          </div>
+          <h3>Add New Equipment</h3>
+        </div>
+        <button class="close-modal-btn" onclick="closeAddItemModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <form id="add-item-form" onsubmit="handleAddNewItem(event)">
+        <div class="form-group">
+          <label for="new-item-name">Equipment Name</label>
+          <input type="text" id="new-item-name" placeholder="e.g., Speed Ladder, Agility Pole" required>
+        </div>
+
+        <div class="form-group">
+          <label for="new-item-category">Category</label>
+          <select id="new-item-category" required>
+            <option value="Balls">⚽ Balls</option>
+            <option value="Markers & Cones">📐 Markers & Cones</option>
+            <option value="Gym & Agility">🏋️ Gym & Agility</option>
+            <option value="General">📦 General Gear</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="new-item-count">Initial Total Quantity</label>
+          <div class="stepper-input-row">
+            <button type="button" class="stepper-btn-modal" onclick="adjustModalCount(-1)">-</button>
+            <input type="number" id="new-item-count" value="10" min="1" required>
+            <button type="button" class="stepper-btn-modal" onclick="adjustModalCount(1)">+</button>
+            <button type="button" class="chip-btn-modal" onclick="adjustModalCount(5)">+5</button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="secondary-btn" onclick="closeAddItemModal()">Cancel</button>
+          <button type="submit" class="primary-action-btn">Save Equipment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MANAGE STAFF / COACHES -->
+  <div class="modal-backdrop" id="manage-staff-modal">
+    <div class="modal-container staff-modal-container">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="icon-circle lime-bg">
+            <i data-lucide="users"></i>
+          </div>
+          <h3>Manage Coaches & Staff</h3>
+        </div>
+        <button class="close-modal-btn" onclick="closeManageStaffModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="staff-manage-body">
+        <p class="modal-subtitle">Edit existing coach names or add new staff members to the academy roster.</p>
+        
+        <div class="staff-manage-list" id="staff-manage-list">
+          <!-- Dynamic staff edit list rendered here -->
+        </div>
+
+        <div class="add-staff-form-box">
+          <h4>➕ Add New Staff Member</h4>
+          <div class="add-staff-inputs-row">
+            <input type="text" id="new-staff-name" placeholder="e.g. Coach Marcus" required>
+            <input type="text" id="new-staff-role" placeholder="e.g. Youth Coach" required>
+            <button type="button" class="primary-action-btn sm-btn" onclick="addNewStaffMember()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="primary-action-btn" onclick="saveStaffChanges()">Save & Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RESOLVE / UPDATE FOUND GEAR -->
+  <div class="modal-backdrop" id="resolve-gear-modal">
+    <div class="modal-container resolve-modal-container">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="icon-circle lime-bg">
+            <i data-lucide="check-check"></i>
+          </div>
+          <h3>Resolve Found Equipment</h3>
+        </div>
+        <button class="close-modal-btn" onclick="closeResolveModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="resolve-modal-body">
+        <p class="modal-subtitle" id="resolve-session-subtitle">Log recovered missing gear for this session.</p>
+        
+        <div class="resolve-items-list" id="resolve-items-list">
+          <!-- Dynamic missing item rows rendered here -->
+        </div>
+
+        <div class="form-group" style="margin-top:16px;">
+          <label for="resolve-note-input">Resolution Note (Optional)</label>
+          <input type="text" id="resolve-note-input" placeholder="e.g. Found under pitch bench by Staff John">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="secondary-btn" onclick="closeResolveModal()">Cancel</button>
+        <button type="button" class="primary-action-btn" onclick="saveResolveGear()">Update & Resolve Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide Icons after script loads
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
